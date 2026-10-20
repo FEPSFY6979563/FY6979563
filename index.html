@@ -30,16 +30,17 @@
               display: none;
             }
 
-            /* ASCII Cube: Placed on the right side, black text, no box */
+            /* ASCII Cube: Clean, unclipped, black text on white background, positioned on the right */
             #ascii-cube {
               position: absolute;
-              right: 60px;
-              top: 350px;
+              right: 40px;
+              top: 250px;
               background-color: transparent;
               color: #000000;
               font-family: monospace;
-              font-size: 11px;
-              line-height: 10px;
+              font-size: 10px;
+              line-height: 9px;
+              white-space: pre;
               pointer-events: none;
             }
         </style>
@@ -47,7 +48,7 @@
     
     <body style="background-color:#FFFFFF; margin-left:50px; position: relative;">
         
-        <!-- 3D ASCII Cube Display Element (Floats on the right side) -->
+        <!-- 3D ASCII Cube Display Element -->
         <pre id="ascii-cube"></pre>
 
         <img src="download.png" alt="Banner" width="1200" height="300">
@@ -119,7 +120,7 @@ classifier confidence to drop, as in Vlachos (2008).
         <script>
         (function () {
           let A = 0, B = 0, C = 0;
-          const width = 38, height = 26;
+          const width = 56, height = 36; // Expanded grid width & height to prevent clipping
           const zBuffer = new Array(width * height);
           const buffer = new Array(width * height);
           const backgroundASCIICode = ' ';
