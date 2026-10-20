@@ -4,7 +4,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         
-        <!-- Style for tables and layout -->
+        <!-- Style for tables, layout, and right-side black ASCII cube -->
         <style>
             table {
               font-family: arial, sans-serif;
@@ -29,11 +29,27 @@
             .mySlides {
               display: none;
             }
+
+            /* ASCII Cube: Placed on the right side, black text, no box */
+            #ascii-cube {
+              position: absolute;
+              right: 60px;
+              top: 350px;
+              background-color: transparent;
+              color: #000000;
+              font-family: monospace;
+              font-size: 11px;
+              line-height: 10px;
+              pointer-events: none;
+            }
         </style>
     </head>
     
-    <body style="background-color:#FFFFFF;margin-left:50px;">
+    <body style="background-color:#FFFFFF; margin-left:50px; position: relative;">
         
+        <!-- 3D ASCII Cube Display Element (Floats on the right side) -->
+        <pre id="ascii-cube"></pre>
+
         <img src="download.png" alt="Banner" width="1200" height="300">
         
         <h1><b>ENG0018 Computer Laboratory 2026/27</b></h1>
@@ -98,6 +114,83 @@ classifier confidence to drop, as in Vlachos (2008).
 
         <!-- Analysis and Discussion Section -->
         <h3 id="Analysis and discussion">Analysis and discussion</h3>
-        
+
+        <!-- 3D ASCII Cube JavaScript Engine -->
+        <script>
+        (function () {
+          let A = 0, B = 0, C = 0;
+          const width = 38, height = 26;
+          const zBuffer = new Array(width * height);
+          const buffer = new Array(width * height);
+          const backgroundASCIICode = ' ';
+          const distanceFromCam = 100;
+          const K1 = 40;
+          const cubeWidth = 20;
+
+          function calculateX(i, j, k) {
+            return j * Math.sin(A) * Math.sin(B) * Math.cos(C) - k * Math.cos(A) * Math.sin(B) * Math.cos(C) +
+                   j * Math.cos(A) * Math.sin(C) + k * Math.sin(A) * Math.sin(C) + i * Math.cos(B) * Math.cos(C);
+          }
+
+          function calculateY(i, j, k) {
+            return j * Math.cos(A) * Math.cos(C) + k * Math.sin(A) * Math.cos(C) -
+                   j * Math.sin(A) * Math.sin(B) * Math.sin(C) + k * Math.cos(A) * Math.sin(B) * Math.sin(C) -
+                   i * Math.cos(B) * Math.sin(C);
+          }
+
+          function calculateZ(i, j, k) {
+            return k * Math.cos(A) * Math.cos(B) - j * Math.sin(A) * Math.cos(B) + i * Math.sin(B) + distanceFromCam;
+          }
+
+          function calculateForSurface(cubeX, cubeY, cubeZ, ch) {
+            let x = calculateX(cubeX, cubeY, cubeZ);
+            let y = calculateY(cubeX, cubeY, cubeZ);
+            let z = calculateZ(cubeX, cubeY, cubeZ);
+
+            let ooz = 1 / z;
+            let xp = Math.floor(width / 2 + K1 * ooz * x * 2);
+            let yp = Math.floor(height / 2 + K1 * ooz * y);
+
+            let idx = xp + yp * width;
+            if (idx >= 0 && idx < width * height) {
+              if (ooz > zBuffer[idx]) {
+                zBuffer[idx] = ooz;
+                buffer[idx] = ch;
+              }
+            }
+          }
+
+          function renderFrame() {
+            buffer.fill(backgroundASCIICode);
+            zBuffer.fill(0);
+
+            let incrementSpeed = 1.2;
+            for (let cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
+              for (let cubeY = -cubeWidth; cubeY < cubeWidth; cubeY += incrementSpeed) {
+                calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
+                calculateForSurface(cubeWidth, cubeY, cubeX, '$');
+                calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
+                calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
+                calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
+                calculateForSurface(cubeX, cubeWidth, cubeY, '+');
+              }
+            }
+
+            let output = '';
+            for (let i = 0; i < buffer.length; i++) {
+              output += i % width === 0 && i !== 0 ? '\n' + buffer[i] : buffer[i];
+            }
+
+            const elem = document.getElementById('ascii-cube');
+            if (elem) elem.textContent = output;
+
+            A += 0.04;
+            B += 0.04;
+            C += 0.01;
+          }
+
+          setInterval(renderFrame, 30);
+        })();
+        </script>
     </body>
 </html>
