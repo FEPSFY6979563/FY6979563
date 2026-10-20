@@ -4,7 +4,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         
-        <!-- Style for tables, layout, and inline ASCII cube -->
+        <!-- Style for tables and layout -->
         <style>
             table {
               font-family: arial, sans-serif;
@@ -28,21 +28,6 @@
 
             .mySlides {
               display: none;
-            }
-
-            /* Inline ASCII Cube Styling */
-            #ascii-cube {
-              display: block;
-              margin: 30px auto;
-              width: fit-content;
-              background-color: #050811;
-              color: #00ff66;
-              font-family: monospace;
-              font-size: 14px;
-              line-height: 12px;
-              border-radius: 8px;
-              padding: 20px;
-              box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             }
         </style>
     </head>
@@ -111,88 +96,143 @@ classifier confidence to drop, as in Vlachos (2008).
 </pre>
         </p>
 
-        <!-- Analysis and Discussion Section (with ASCII Cube embedded) -->
+        <!-- Analysis and Discussion Section -->
         <h3 id="Analysis and discussion">Analysis and discussion</h3>
         
-        <!-- 3D ASCII Cube Display Element -->
-        <pre id="ascii-cube"></pre>
-
-        <!-- 3D ASCII Cube JavaScript Engine -->
-        <script>
-        (function () {
-          let A = 0, B = 0, C = 0;
-          const width = 50, height = 30;
-          const zBuffer = new Array(width * height);
-          const buffer = new Array(width * height);
-          const backgroundASCIICode = ' ';
-          const distanceFromCam = 100;
-          const K1 = 40;
-          const cubeWidth = 20;
-
-          function calculateX(i, j, k) {
-            return j * Math.sin(A) * Math.sin(B) * Math.cos(C) - k * Math.cos(A) * Math.sin(B) * Math.cos(C) +
-                   j * Math.cos(A) * Math.sin(C) + k * Math.sin(A) * Math.sin(C) + i * Math.cos(B) * Math.cos(C);
-          }
-
-          function calculateY(i, j, k) {
-            return j * Math.cos(A) * Math.cos(C) + k * Math.sin(A) * Math.cos(C) -
-                   j * Math.sin(A) * Math.sin(B) * Math.sin(C) + k * Math.cos(A) * Math.sin(B) * Math.sin(C) -
-                   i * Math.cos(B) * Math.sin(C);
-          }
-
-          function calculateZ(i, j, k) {
-            return k * Math.cos(A) * Math.cos(B) - j * Math.sin(A) * Math.cos(B) + i * Math.sin(B) + distanceFromCam;
-          }
-
-          function calculateForSurface(cubeX, cubeY, cubeZ, ch) {
-            let x = calculateX(cubeX, cubeY, cubeZ);
-            let y = calculateY(cubeX, cubeY, cubeZ);
-            let z = calculateZ(cubeX, cubeY, cubeZ);
-
-            let ooz = 1 / z;
-            let xp = Math.floor(width / 2 + K1 * ooz * x * 2);
-            let yp = Math.floor(height / 2 + K1 * ooz * y);
-
-            let idx = xp + yp * width;
-            if (idx >= 0 && idx < width * height) {
-              if (ooz > zBuffer[idx]) {
-                zBuffer[idx] = ooz;
-                buffer[idx] = ch;
-              }
-            }
-          }
-
-          function renderFrame() {
-            buffer.fill(backgroundASCIICode);
-            zBuffer.fill(0);
-
-            let incrementSpeed = 1.2;
-            for (let cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
-              for (let cubeY = -cubeWidth; cubeY < cubeWidth; cubeY += incrementSpeed) {
-                calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
-                calculateForSurface(cubeWidth, cubeY, cubeX, '$');
-                calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
-                calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
-                calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
-                calculateForSurface(cubeX, cubeWidth, cubeY, '+');
-              }
-            }
-
-            let output = '';
-            for (let i = 0; i < buffer.length; i++) {
-              output += i % width === 0 && i !== 0 ? '\n' + buffer[i] : buffer[i];
-            }
-
-            const elem = document.getElementById('ascii-cube');
-            if (elem) elem.textContent = output;
-
-            A += 0.04;
-            B += 0.04;
-            C += 0.01;
-          }
-
-          setInterval(renderFrame, 30);
-        })();
-        </script>
     </body>
 </html>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+float A, B, C;
+
+float cubeWidth = 20;
+int width = 160, height = 44;
+float zBuffer[160 * 44];
+char buffer[160 * 44];
+int backgroundASCIICode = ' ';
+int distanceFromCam = 100;
+float horizontalOffset;
+float K1 = 40;
+
+float incrementSpeed = 0.6;
+
+float x, y, z;
+float ooz;
+int xp, yp;
+int idx;
+
+float calculateX(int i, int j, int k) {
+  return (
+    j * sin(A) * sin(B) * cos(C) - k * cos(A) * sin(B) * cos(C) + 
+    j * cos(A) * sin(C) + k * sin(A) * sin(C) + i * cos(B) * cos(C)
+    );
+}
+
+float calculateY(int i, int j, int k) {
+  return (
+    j * cos(A) * cos(C) + k * sin(A) * cos(C) - 
+    j * sin(A) * sin(B) * sin(C) + k * cos(A) * sin(B) * sin(C) - 
+    i * cos(B) * sin(C)
+    );
+}
+
+float calculateZ(int i, int j, int k) {
+  return (
+    k * cos(A) * cos(B) - 
+    j * sin(A) * cos(B) + i * sin(B)
+    );
+}
+
+void calculateForSurface(float cubeX, float cubeY, float cubeZ, int ch) {
+  x = calculateX(cubeX, cubeY, cubeZ);
+  y = calculateY(cubeX, cubeY, cubeZ);
+  z = calculateZ(cubeX, cubeY, cubeZ) + distanceFromCam;
+
+  ooz = 1 / z;
+
+  xp = (int)(width / 2 + horizontalOffset + K1 * ooz * x * 2);
+  yp = (int)(height / 2 + K1 * ooz * y);
+
+  idx = xp + yp * width;
+  if (idx >= 0 && idx < width * height) {
+    if (ooz > zBuffer[idx]) {
+      zBuffer[idx] = ooz;
+      buffer[idx] = ch;
+    }
+  }
+}
+
+int main() {
+  printf("\x1b[2J");
+  while (1) {
+    memset(buffer, backgroundASCIICode, width * height);
+    memset(zBuffer, 0, width * height * 4);
+    
+    
+    // first cube
+    cubeWidth = 20;
+    horizontalOffset = -2 * cubeWidth;
+    
+    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
+      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
+           cubeY += incrementSpeed) {
+        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
+        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
+        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
+        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
+        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
+        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
+      }
+    }
+    
+    
+    // second cube
+    cubeWidth = 10;
+    horizontalOffset = 1 * cubeWidth;
+    
+    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
+      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
+           cubeY += incrementSpeed) {
+        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
+        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
+        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
+        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
+        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
+        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
+      }
+    }
+    
+    
+    // third cube
+    cubeWidth = 5;
+    horizontalOffset = 8 * cubeWidth;
+    
+    for (float cubeX = -cubeWidth; cubeX < cubeWidth; cubeX += incrementSpeed) {
+      for (float cubeY = -cubeWidth; cubeY < cubeWidth;
+           cubeY += incrementSpeed) {
+        calculateForSurface(cubeX, cubeY, -cubeWidth, '@');
+        calculateForSurface(cubeWidth, cubeY, cubeX, '$');
+        calculateForSurface(-cubeWidth, cubeY, -cubeX, '~');
+        calculateForSurface(-cubeX, cubeY, cubeWidth, '#');
+        calculateForSurface(cubeX, -cubeWidth, -cubeY, ';');
+        calculateForSurface(cubeX, cubeWidth, cubeY, '+');
+      }
+    }
+    
+    printf("\x1b[H");
+    for (int k = 0; k < width * height; k++) {
+      putchar(k % width ? buffer[k] : 10);
+    }
+
+    A += 0.05;
+    B += 0.05;
+    C += 0.01;
+    
+    usleep(8000 * 2);
+  }
+  
+  return 0;
+}
