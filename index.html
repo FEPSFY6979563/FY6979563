@@ -4,8 +4,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
         
-        <!-- Style for tables, layout, and right-side black ASCII cube -->
+        <!-- Style for tables, layout, matrix intro, and right-side black ASCII cube -->
         <style>
+            /* Matrix Intro Overlay Styles */
+            #matrix-intro {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: #000000;
+                z-index: 99999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: opacity 1s ease-in-out;
+            }
+            #matrix-canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            .fade-out {
+                opacity: 0;
+                pointer-events: none;
+            }
+
             table {
               font-family: arial, sans-serif;
               border-collapse: collapse;
@@ -47,6 +71,11 @@
     </head>
     
     <body style="background-color:#FFFFFF; margin-left:50px; position: relative;">
+
+        <!-- Matrix Intro Overlay -->
+        <div id="matrix-intro">
+            <canvas id="matrix-canvas"></canvas>
+        </div>
         
         <!-- 3D ASCII Cube Display Element -->
         <pre id="ascii-cube"></pre>
@@ -115,8 +144,7 @@ classifier confidence to drop, as in Vlachos (2008).
 
         <!-- Analysis and Discussion Section -->
         <h3 id="Analysis and discussion">Analysis and discussion</h3>
-        <p>Bridge deck repair durability is the subject of much recent research such as in <a href="https://www.icevirtuallibrary.com/doi/full/10.1680/jbren.21.00034"
->Toshihiko et al (2023)</a>.</p>
+        <p>Bridge deck repair durability is the subject of much recent research such as in <a href="https://www.icevirtuallibrary.com/doi/full/10.1680/jbren.21.00034"Download PDF>Toshihiko et al (2023)</a>.</p>
 
         <p>Table 1: Data on cost and lifespan of bridge repairs</p>
         <table>
@@ -166,11 +194,60 @@ In: Proc. 17th Internat. Conf.on Machine Learning. Morgan Kaufman, Stanford, CA,
 </pre>
         </p>
 
-        <!-- 3D ASCII Cube JavaScript Engine -->
+        <!-- Matrix Intro & 3D ASCII Cube JavaScript Engine -->
         <script>
+        // Matrix Intro Rain Animation
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const alphabet = katakana + latin;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = [];
+
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+
+        const matrixInterval = setInterval(drawMatrix, 30);
+
+        // Fade out matrix intro after 3.5 seconds
+        setTimeout(() => {
+            const intro = document.getElementById('matrix-intro');
+            intro.classList.add('fade-out');
+            clearInterval(matrixInterval);
+            setTimeout(() => intro.remove(), 1000);
+        }, 3500);
+
+
+        // 3D ASCII Cube Engine
         (function () {
           let A = 0, B = 0, C = 0;
-          const width = 56, height = 36; // Expanded grid width & height to prevent clipping
+          const width = 56, height = 36;
           const zBuffer = new Array(width * height);
           const buffer = new Array(width * height);
           const backgroundASCIICode = ' ';
