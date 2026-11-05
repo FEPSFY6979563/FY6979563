@@ -172,6 +172,35 @@
         <h3 id="F1Example">A real F1 example</h3>
         <p class="ex1">So far, this article has looked at how AI can be used in CFD simulations, but how is it used in F1? F1 provided AWS with a front wing design, and AI then picked which wing designs to test next, learning from each result. AWS reports that it found roughly 2.5% more downforce in 12 rounds of testing, compared with the 25 simulations normally needed (<a href="#ref-HermosoMoreno2022">Hermoso Moreno, 2022</a>). With the help of AI, the number of test runs can be reduced, as we have seen. This is very good for F1 teams because they can use their remaining tests on more types of parts meaning they get more out of testing overall.</p>
 
+        <!-- Table 1 -->
+        <p class="ex1"><b>Table 1: Comparison of the three ways AI is used to support aerodynamic design</b></p>
+        <table style="width: 100%; max-width: 900px;">
+          <tr>
+            <th>Source</th>
+            <th>What the AI does</th>
+            <th>Main result</th>
+            <th>Limitation</th>
+          </tr>
+          <tr>
+            <td><a href="#ref-Liu2026">Liu et al. (2026)</a></td>
+            <td>Predicts a car’s drag from its body shape without a full CFD simulation</td>
+            <td>Performed better than other AI methods; useful in early design</td>
+            <td>Only tested under fixed conditions; checked against CFD, not real-world tests</td>
+          </tr>
+          <tr>
+            <td><a href="#ref-Bounds2024">Bounds, Desai and Uddin (2024)</a></td>
+            <td>Uses machine learning to pick the best turbulence model settings in CFD</td>
+            <td>Errors dropped to under 7% on one shape and under 0.5% on the other</td>
+            <td>Tested on the Ahmed body, a much simpler shape than an F1 car</td>
+          </tr>
+          <tr>
+            <td><a href="#ref-HermosoMoreno2022">Hermoso Moreno (2022)</a></td>
+            <td>Picks which F1 front wing designs to test next, learning from each result</td>
+            <td>Roughly 2.5% more downforce in 12 rounds, compared with 25 simulations normally needed</td>
+            <td>AWS blog promoting its own product; F1 was still looking into using it</td>
+          </tr>
+        </table>
+
         <!-- Limits of AI and conclusion Section -->
         <h3 id="Conclusion">Limits of AI and conclusion</h3>
         <p class="ex1">Although AI is useful in aerodynamic design, it has limitations. The AI developed by <a href="#ref-Liu2026">Liu et al. (2026)</a> was only tested under fixed conditions, and its accuracy was checked against CFD rather than real-world tests, so AI still depends on CFD. Similarly, <a href="#ref-Bounds2024">Bounds, Desai and Uddin (2024)</a> tested their method on the Ahmed body, a much simpler shape than an F1 car. Overall, this article has shown that AI can definitely be used in F1 to reduce testing and make aerodynamic design more efficient. However, AI does not replace engineers; it is a tool to speed up their work. As long as F1 continues to limit testing, AI will become an even more important tool for teams.</p>
